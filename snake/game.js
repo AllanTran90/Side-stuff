@@ -65,5 +65,44 @@ snake.unshift;
 // regular food
 if (newHead.x === food.x && newHead.y === food.y){
     score++;
-    scoreEl.textContent = score
+    scoreEl.textContent = score;
+    food = spawnFood();
+
+    // sometime bonus
+    if (Math.random() < 0.2){
+        bonusFood = spawnFood();
+        bonusTimer = 100;
+    }
 }
+
+// bonus food
+else if (
+    bonusFood &&
+    newHead.x === bonusFood.x &&
+    newHead.y === bonusFood.y
+){
+    score += 5;
+    scoreEl.textContent = score;
+    bonusFood = null;
+}
+else {
+    snake.pop();
+}
+
+// bonus timeout
+if (bonusFood){
+    bonusTimer--;
+    if (bonusTimer <= 0) bonusFood = null;
+}
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
+    if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
+    if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
+    if (e.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
+});
+
+//  Nokia speed
+setInterval(() => {
+    update();
+    draw(); 
+}, 150);
