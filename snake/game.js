@@ -2,13 +2,13 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 
-const tileSize = 20
-const tile = canvas.width / tileSize;
+const tileSize = 20;
+const tiles = canvas.width / tileSize;
 
 let snake = [
-    { x: 10, y: 10 },
-    { x: 9, y: 10},
-    { x: 8, y: 10}
+  { x: 10, y: 10 },
+  { x: 9, y: 10 },
+  { x: 8, y: 10 }
 ];
 
 let direction = { x: 1, y: 0 };
@@ -18,91 +18,112 @@ let food = spawnFood();
 let bonusFood = null;
 let bonusTimer = 0;
 
-function spawnFood(){
-    return{
-        x:Math.floor(Math.random() * tiles),
-        y:Math.floor(Math.random() * tiles)
-    };
+function spawnFood() {
+  return {
+    x: Math.floor(Math.random() * tiles),
+    y: Math.floor(Math.random() * tiles)
+  };
 }
 
-function draw(){
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // snake
+  ctx.fillStyle = "#1f2b16";
+  snake.forEach(part => {
+    ctx.fillRect(
+      part.x * tileSize,
+      part.y * tileSize,
+      tileSize,
+      tileSize
+    );
+  });
+
+  // food
+  ctx.fillRect(
+    food.x * tileSize,
+    food.y * tileSize,
+    tileSize,
+    tileSize
+  );
+
+  // bonus food
+  if (bonusFood) {
+    ctx.fillStyle = bonusTimer % 20 < 10 ? "#000" : "#556b2f";
+    ctx.fillRect(
+      bonusFood.x * tileSize,
+      bonusFood.y * tileSize,
+      tileSize,
+      tileSize
+    );
     ctx.fillStyle = "#1f2b16";
-    snake.forEach(part => {
-        ctx.fillRect(
-            part.x * tileSize,
-            part.y * tileSize,
-            tileSize,
-            tileSize
-        );
-        ctx.fillStyle = "#1f2b16";
-    })
+  }
 }
-// regular food
- function update(){
-    const head = snake[0];
-    let newHead = {
-        x: head.x + direction.x,
-        y: head.y + direction.y
-    };
-    // can pass through wall
-    if (newHead.x < 0) newHead.x = tiles -1;
-    if (newHead.x >= tiles) newHead.x = 0;
-    if (newHead.y < 0) newHead.y = tiles -1;
-    if (newHead.y >= tiles) newHead.y = 0;
- }
 
-//  crash into itselt = game over
-for (const part of snake){
-    if (part.x === newHead.x && part.y === newHead.y){
-        alert("GAME OVER\nPoints: " + score);
-        location.reload();
-        return;
+function update() {
+  const head = snake[0];
+  const newHead = {
+    x: head.x + direction.x,
+    y: head.y + direction.y
+  };
+
+  // wrap-around (Nokia)
+  if (newHead.x < 0) newHead.x = tiles - 1;
+  if (newHead.x >= tiles) newHead.x = 0;
+  if (newHead.y < 0) newHead.y = tiles - 1;
+  if (newHead.y >= tiles) newHead.y = 0;
+
+  // self crash = game over
+  for (const part of snake) {
+    if (part.x === newHead.x && part.y === newHead.y) {
+      alert("GAME OVER\nPoints: " + score);
+      location.reload();
+      return;
     }
-}
+  }
 
-snake.unshift;
+  snake.unshift(newHead);
 
-// regular food
-if (newHead.x === food.x && newHead.y === food.y){
+  // regular food
+  if (newHead.x === food.x && newHead.y === food.y) {
     score++;
     scoreEl.textContent = score;
     food = spawnFood();
 
-    // sometime bonus
-    if (Math.random() < 0.2){
-        bonusFood = spawnFood();
-        bonusTimer = 100;
+    if (Math.random() < 0.2) {
+      bonusFood = spawnFood();
+      bonusTimer = 100;
     }
-}
-
-// bonus food
-else if (
+  }
+  // bonus food
+  else if (
     bonusFood &&
     newHead.x === bonusFood.x &&
     newHead.y === bonusFood.y
-){
+  ) {
     score += 5;
     scoreEl.textContent = score;
     bonusFood = null;
-}
-else {
+  }
+  else {
     snake.pop();
-}
+  }
 
-// bonus timeout
-if (bonusFood){
+  // bonus timeout
+  if (bonusFood) {
     bonusTimer--;
     if (bonusTimer <= 0) bonusFood = null;
+  }
 }
+
 document.addEventListener("keydown", e => {
-    if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
-    if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
-    if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
-    if (e.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
+  if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
+  if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
+  if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
+  if (e.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
 });
 
-//  Nokia speed
 setInterval(() => {
-    update();
-    draw(); 
+  update();
+  draw();
 }, 150);
