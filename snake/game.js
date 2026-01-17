@@ -1,10 +1,19 @@
+let gameOver = false;
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
+const highScoreEl = document.getElementById("highscore");
 
 const tileSize = 20;
 const tiles = canvas.width / tileSize;
 
+// highscore
+let highscore = localStorage.getItem("snakeHighScore");
+highscore = highscore ? Number(highscore) : 0;
+highScoreEl.textContent = highscore;
+
+// game state
 let snake = [
   { x: 10, y: 10 },
   { x: 9, y: 10 },
@@ -40,6 +49,7 @@ function draw() {
   });
 
   // food
+  ctx.fillStyle = "#000";
   ctx.fillRect(
     food.x * tileSize,
     food.y * tileSize,
@@ -56,7 +66,6 @@ function draw() {
       tileSize,
       tileSize
     );
-    ctx.fillStyle = "#1f2b16";
   }
 }
 
@@ -67,24 +76,28 @@ function update() {
     y: head.y + direction.y
   };
 
-  // wrap-around (Nokia)
+  // wrap-around
   if (newHead.x < 0) newHead.x = tiles - 1;
   if (newHead.x >= tiles) newHead.x = 0;
   if (newHead.y < 0) newHead.y = tiles - 1;
   if (newHead.y >= tiles) newHead.y = 0;
 
-  // self crash = game over
-  for (const part of snake) {
+  // self collision
+  for (let part of snake) {
     if (part.x === newHead.x && part.y === newHead.y) {
-      alert("GAME OVER\nPoints: " + score);
-      location.reload();
+      clearInterval(gameLoop);
+      gameOver = true;
+
+      if (score > highscore) {
+        localStorage.setItem("snakeHighScore", score);
+      }
       return;
     }
   }
 
   snake.unshift(newHead);
 
-  // regular food
+  // eat food
   if (newHead.x === food.x && newHead.y === food.y) {
     score++;
     scoreEl.textContent = score;
@@ -95,7 +108,7 @@ function update() {
       bonusTimer = 100;
     }
   }
-  // bonus food
+  // eat bonus
   else if (
     bonusFood &&
     newHead.x === bonusFood.x &&
@@ -117,13 +130,17 @@ function update() {
 }
 
 document.addEventListener("keydown", e => {
+  if (gameOver && e.key === "Enter") {
+    location.reload();
+  }
+
   if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -1 };
   if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: 1 };
   if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -1, y: 0 };
   if (e.key === "ArrowRight" && direction.x === 0) direction = { x: 1, y: 0 };
 });
 
-setInterval(() => {
+const gameLoop = setInterval(() => {
   update();
   draw();
 }, 150);
