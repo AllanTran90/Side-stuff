@@ -1,0 +1,62 @@
+*{box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #0b0f1a;
+    color: #e9ecf1;
+}
+
+.hud{
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.25);
+}
+
+.hint{
+    opacity: 0.75;
+    font-size: 13px;
+}
+
+.wrap{
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+}
+
+canvas {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: radial-gradient(circle at 50% 30%, rgba(60,90,255,0.14), transparent 55%),
+              linear-gradient(#060812, #050611);
+  border-radius: 10px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 18px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: rgba(0,0,0,0.55);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(2px);
+}
+
+.hidden { 
+    display: none; 
+}
+
+.overlay h2 { 
+    margin: 0 0 6px; 
+}
+
+.overlay p { 
+    margin: 0; opacity: 0.85; 
+}
