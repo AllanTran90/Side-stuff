@@ -118,3 +118,77 @@ function spwanEnemies(){
     enemySpeed = 0.55 + (level - 1) * 0.12;
     enemyStepDown = 16 + Math.min(10, level);
 }
+function spawnPowerUp(x, y){
+    powerUps.push({
+          x: x - 10,
+    y: y - 10,
+    w: 20,
+    h: 20,
+    type: randomPowerType(),
+    speed: 2.2
+    })
+}
+
+// reset the game
+function resetGame(){
+     gameOver = false;
+  score = 0;
+  level = 1;
+
+  playerStats.fireRate = 300;
+  playerStats.bulletSpeed = 7;
+  playerStats.moveSpeed = 4;
+  playerStats.bulletCount = 1;
+
+  bullets = [];
+  powerUps = [];
+  player.x = W / 2 - player.w / 2;
+
+  spawnEnemies();
+
+  overlay.classList.add("hidden");
+
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+
+  lastShot = 0;
+  lastTime = 0;
+}
+
+// helpers
+function rectsOverlap(a, b) {
+  return (
+    a.x < b.x + b.w &&
+    a.x + a.w > b.x &&
+    a.y < b.y + b.h &&
+    a.y + a.h > b.y
+  );
+}
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+// shooting
+function shoot(){
+    const count = playerStats.bulletCount;
+    const spread = 12;
+
+    for (let i = 0; i < count; i++){
+        const offset = (i - (count - 1) / 2) * spread;
+    bullets.push({
+      x: player.x + player.w / 2 - 2 + offset,
+      y: player.y,
+      w: 4,
+      h: 10,
+      speed: playerStats.bulletSpeed
+    });
+    }
+}
+
+function autoShoot(time) {
+  if (time - lastShot > playerStats.fireRate) {
+    shoot();
+    lastShot = time;
+  }
+}
