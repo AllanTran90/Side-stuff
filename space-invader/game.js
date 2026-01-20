@@ -4,55 +4,63 @@ const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const highScoreEl = document.getElementById("highscore");
-const overlay =document.getElementById("overlay");
+const powerHudEl = document.getElementById("powerHud");
+const overlay = document.getElementById("overlay");
 const overTitle = document.getElementById("overTitle");
 const overText = document.getElementById("overText");
 
 const W = canvas.width;
 const H = canvas.height;
 
+// background
+const BG_COLOR = "#050510";
+
 // input
-const key = new Set();
+const keys = new Set();
+
 window.addEventListener("keydown", (e) => {
-    key.add(e.key.toLowerCase());
+  keys.add(e.key.toLowerCase());
 
-    if (e.key.toLowerCase() === "r" && gameOver){
-        resetGame();
-    }
+  if (e.key.toLowerCase() === "r" && gameOver) {
+    resetGame();
+  }
 });
-window.addEventListener("keydown", (e) => key.delete(e.key.toLowerCase()));
 
-// game start
-let gameOver =false;
+window.addEventListener("keyup", (e) => {
+  keys.delete(e.key.toLowerCase());
+});
+
+// game state
+let gameOver = false;
 let score = 0;
 let level = 1;
 
-// highscore(localstorage)
-let highScore = localStorage.getItem("spaceInvaderHighScore");
+// highscore
+let highScore = localStorage.getItem("spaceInvadersHighScore");
 highScore = highScore ? Number(highScore) : 0;
 highScoreEl.textContent = highScore;
 
 // player
 const player = {
-    x: W / 2 - 18,
-    y: H - 52,
-    w: 36,
-    h: 16
+  x: W / 2 - 18,
+  y: H - 52,
+  w: 36,
+  h: 16
 };
 
 const playerStats = {
-    fireRate: 300,
-    bulletSpeed: 7,
-    moveSpeed: 4,
-    bulletCount: 1
+  fireRate: 100,
+  bulletSpeed: 7,
+  moveSpeed: 4,
+  bulletCount: 1
 };
 
-// object
-let bullet = [];
+// objects
+let bullets = [];
 let enemies = [];
 let powerUps = [];
 
-// enemies
+// enemy movement
 let enemyDir = 1;
 let enemySpeed = 0.55;
 let enemyStepDown = 16;
@@ -63,96 +71,72 @@ let lastTime = 0;
 
 // power ups
 const POWER_TYPES = {
-    FIRE_RATE: "fire_rate",
-    BULLET_SPEED: "bullet_speed",
-    MULTI_SHOT: "multi_shot",
-    MOVE_SPEED: "move_speed"
+  FIRE_RATE: "fire_rate",
+  BULLET_SPEED: "bullet_speed",
+  MULTI_SHOT: "multi_shot",
+  MOVE_SPEED: "move_speed"
 };
 
-function randomPowerType(){
-    const arr = Object.values(POWER_TYPES);
-    return arr[Math.floor(Math.random() * arr.length)];
+function randomPowerType() {
+  const arr = Object.values(POWER_TYPES);
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function applyPowerUp(type){
-    switch(type){
-        case POWER_TYPES.FIRE_RATE:
-            playerStats.fireRate = Math.max(80, playerStats.fireRate - 30);
-            break;
-        case POWER_TYPES.BULLET_SPEED:
-            playerStats.bulletSpeed += 1;
-            break;
-        case POWER_TYPES.MULTI_SHOT:
-            playerStats.bulletCount += 1;
-            break;
-        case POWER_TYPES.MOVE_SPEED:
-            playerStats.moveSpeed += 0.5;
-            break;        
-        }
+function applyPowerUp(type) {
+  switch (type) {
+    case POWER_TYPES.FIRE_RATE:
+      playerStats.fireRate = Math.max(80, playerStats.fireRate - 30);
+      break;
+    case POWER_TYPES.BULLET_SPEED:
+      playerStats.bulletSpeed += 1;
+      break;
+    case POWER_TYPES.MULTI_SHOT:
+      playerStats.bulletCount += 1;
+      break;
+    case POWER_TYPES.MOVE_SPEED:
+      playerStats.moveSpeed += 0.5;
+      break;
+  }
 }
 
-// spawn
-function spwanEnemies(){
-    enemies = [];
+// power hud
+function updatePowerHud() {
+  const parts = [];
 
-    const row = 4 + Math.min(2, Math.floor((level - 1) / 2));
-    const cols = 9;
-    const pad = 10;
-    const ew = 28;
-    const eh = 18;
-    const startX = 34;
-    const startY = 70;
+  if (playerStats.bulletCount > 1) parts.push(`Multi x${playerStats.bulletCount}`);
+  if (playerStats.fireRate < 300) parts.push(`Fire ${playerStats.fireRate}ms`);
+  if (playerStats.moveSpeed > 4) parts.push(`Speed +${(playerStats.moveSpeed - 4).toFixed(1)}`);
+  if (playerStats.bulletSpeed > 7) parts.push(`Bullet +${playerStats.bulletSpeed - 7}`);
 
-    for ( let r = 0; r < rows; r++){
-        for (let c = 0; c < cols; c++){
-            enemies.push({
-                x: startX + c * (ew + pad),
-                y: startY + r * (eh + pad),
-                w: ew,
-                h: eh
-            });
-        }
+  powerHudEl.textContent =
+    parts.length > 0 ? `Powers: ${parts.join(" | ")}` : "Powers: -";
+}
+
+// spawn enemies
+function spawnEnemies() {
+  enemies = [];
+
+  const rows = 4 + Math.min(2, Math.floor((level - 1) / 2));
+  const cols = 9;
+  const pad = 10;
+  const ew = 28;
+  const eh = 18;
+  const startX = 34;
+  const startY = 70;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      enemies.push({
+        x: startX + c * (ew + pad),
+        y: startY + r * (eh + pad),
+        w: ew,
+        h: eh
+      });
     }
+  }
 
-    enemyDir = 1;
-    enemySpeed = 0.55 + (level - 1) * 0.12;
-    enemyStepDown = 16 + Math.min(10, level);
-}
-function spawnPowerUp(x, y){
-    powerUps.push({
-          x: x - 10,
-    y: y - 10,
-    w: 20,
-    h: 20,
-    type: randomPowerType(),
-    speed: 2.2
-    })
-}
-
-// reset the game
-function resetGame(){
-     gameOver = false;
-  score = 0;
-  level = 1;
-
-  playerStats.fireRate = 300;
-  playerStats.bulletSpeed = 7;
-  playerStats.moveSpeed = 4;
-  playerStats.bulletCount = 1;
-
-  bullets = [];
-  powerUps = [];
-  player.x = W / 2 - player.w / 2;
-
-  spawnEnemies();
-
-  overlay.classList.add("hidden");
-
-  scoreEl.textContent = score;
-  levelEl.textContent = level;
-
-  lastShot = 0;
-  lastTime = 0;
+  enemyDir = 1;
+  enemySpeed = 0.55 + (level - 1) * 0.12;
 }
 
 // helpers
@@ -170,20 +154,14 @@ function clamp(v, min, max) {
 }
 
 // shooting
-function shoot(){
-    const count = playerStats.bulletCount;
-    const spread = 12;
-
-    for (let i = 0; i < count; i++){
-        const offset = (i - (count - 1) / 2) * spread;
-    bullets.push({
-      x: player.x + player.w / 2 - 2 + offset,
-      y: player.y,
-      w: 4,
-      h: 10,
-      speed: playerStats.bulletSpeed
-    });
-    }
+function shoot() {
+  bullets.push({
+    x: player.x + player.w / 2 - 2,
+    y: player.y,
+    w: 4,
+    h: 10,
+    speed: playerStats.bulletSpeed
+  });
 }
 
 function autoShoot(time) {
@@ -194,85 +172,91 @@ function autoShoot(time) {
 }
 
 // update
-function update(dt, time){
-    if(keys.has("arrowleft") || keys.has("a")){
-        player.x -= playerStats.moveSpeed; 
-    }
-    if(keys.has("arrowright") || key.has("d")){
-        player.x += playerStats.moveSpeed;
-    }
-    player.x = clamp(player.x, 10, W - player.w - 10);
+function update(dt, time) {
+  // player movement
+  if (keys.has("arrowleft") || keys.has("a")) player.x -= playerStats.moveSpeed;
+  if (keys.has("arrowright") || keys.has("d")) player.x += playerStats.moveSpeed;
+  player.x = clamp(player.x, 10, W - player.w - 10);
 
-    autoShoot(time);
+  autoShoot(time);
 
-    // bullets
+  // bullets movement
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    bullets[i].y -= bullets[i].speed;
+    if (bullets[i].y + bullets[i].h < 0) {
+      bullets.splice(i, 1);
+    }
+  }
 
-    for(let i = bullet.length -1; i >= 0; i--){
-        bullets[i].y -= bullets[i].speed;
-        if (bullets[i].y + bullets[i].h < 0){
-            bullets.splice(i, 1);
-        }
-    }
-    // enemy movement
-    if (enemies.length > 0){
-        let minX = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
+  // enemy movement
+  if (enemies.length > 0) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-        for (const e of enemies){
-            minX = Math.min(minX, e.x);
-            maxX = Math.max(maxX, e.x + e.w);
-            maxY = Math.max(maxY, e.y + e.h);
-        }
-        if(maxX >= W - 14 ||minX <= 14){
-            enemyDir *= -1;
-            for(const e of enemies){
-                e.y += enemyStepDown; 
-            }
-        }
-    }else{
-        for (const e of enemies){
-            e.x += enemyDir * enemySpeed * (dt / 16.67);
-        }
+    for (const e of enemies) {
+      minX = Math.min(minX, e.x);
+      maxX = Math.max(maxX, e.x + e.w);
+      maxY = Math.max(maxY, e.y + e.h);
     }
-    if(maxY >= player.y - 8){
-        endGame();
+
+    if (enemyDir === 1 && maxX >= W - 14) {
+      enemyDir = -1;
+      enemies.forEach(e => e.y += enemyStepDown);
+    } 
+    else if (enemyDir === -1 && minX <= 14) {
+      enemyDir = 1;
+      enemies.forEach(e => e.y += enemyStepDown);
+    } 
+    else {
+      enemies.forEach(e => e.x += enemyDir * enemySpeed * (dt / 16.67));
     }
+
+    if (maxY >= player.y - 8) {
+      endGame();
+    }
+  }
+} // 👈 update STÄNGS HÄR (fixar syntax-felet)
+
+// draw
+function draw() {
+  // background
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, W, H);
+
+  // player
+  ctx.fillStyle = "#EAF1FF";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+
+  // bullets
+  ctx.fillStyle = "#7CFFCB";
+  bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+
+  // enemies
+  ctx.fillStyle = "#FF6B8A";
+  enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
 }
 
-// bullet vs enemy
-for(let bi = bullets.length - 1; bi >= 0; bi--){
-    for(let ei = enemies.length - 1; ei >= 0; ei--){
-        if (rectsOverlap(bullets[bi], enemies[ei])){
-            bullets.splice(bi, 1);
-            const dead = enemies.splice(ei, 1)[0];
-
-            score += 10;
-            scoreEl.textContent = score;
-
-            // update highscore
-            if(score > highScore){
-                highScore = score;
-                highScoreEl.textContent = highScore;
-                localStorage.setItem("SpaceInvaderHighScore")
-            }
-            if (Math.random() < 0.18) {
-                spawnPowerUp(dead.x + dead.w / 2, dead.y + dead.h / 2);
-        }
-        break;
-        }
-    }
+// game over
+function endGame() {
+  gameOver = true;
+  overTitle.textContent = "Game Over";
+  overText.textContent = "Press R to restart";
+  overlay.classList.remove("hidden");
 }
-// powerups
-for (let i = powerUps.length - 1; i >= 0; i--){
-    powerUps[i].y += powerUps[i].speed;
 
-    if(rectsOverlap(player, powerUps[i])){
-        applyPowerUp(powerUps[i].type);
-        powerUps.splice(i, 1);
-        continue;
-    }
-    if(powerUps[i].y > H + 30){
-        powerUps.splice(i, 1);
-    }
+// loop
+function loop(time) {
+  if (!gameOver) {
+    const dt = lastTime ? time - lastTime : 16.67;
+    lastTime = time;
+    update(dt, time);
+  }
+
+  draw();
+  requestAnimationFrame(loop);
 }
+
+spawnEnemies();
+updatePowerHud();
+requestAnimationFrame(loop);
