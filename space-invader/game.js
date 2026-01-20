@@ -192,3 +192,87 @@ function autoShoot(time) {
     lastShot = time;
   }
 }
+
+// update
+function update(dt, time){
+    if(keys.has("arrowleft") || keys.has("a")){
+        player.x -= playerStats.moveSpeed; 
+    }
+    if(keys.has("arrowright") || key.has("d")){
+        player.x += playerStats.moveSpeed;
+    }
+    player.x = clamp(player.x, 10, W - player.w - 10);
+
+    autoShoot(time);
+
+    // bullets
+
+    for(let i = bullet.length -1; i >= 0; i--){
+        bullets[i].y -= bullets[i].speed;
+        if (bullets[i].y + bullets[i].h < 0){
+            bullets.splice(i, 1);
+        }
+    }
+    // enemy movement
+    if (enemies.length > 0){
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        for (const e of enemies){
+            minX = Math.min(minX, e.x);
+            maxX = Math.max(maxX, e.x + e.w);
+            maxY = Math.max(maxY, e.y + e.h);
+        }
+        if(maxX >= W - 14 ||minX <= 14){
+            enemyDir *= -1;
+            for(const e of enemies){
+                e.y += enemyStepDown; 
+            }
+        }
+    }else{
+        for (const e of enemies){
+            e.x += enemyDir * enemySpeed * (dt / 16.67);
+        }
+    }
+    if(maxY >= player.y - 8){
+        endGame();
+    }
+}
+
+// bullet vs enemy
+for(let bi = bullets.length - 1; bi >= 0; bi--){
+    for(let ei = enemies.length - 1; ei >= 0; ei--){
+        if (rectsOverlap(bullets[bi], enemies[ei])){
+            bullets.splice(bi, 1);
+            const dead = enemies.splice(ei, 1)[0];
+
+            score += 10;
+            scoreEl.textContent = score;
+
+            // update highscore
+            if(score > highScore){
+                highScore = score;
+                highScoreEl.textContent = highScore;
+                localStorage.setItem("SpaceInvaderHighScore")
+            }
+            if (Math.random() < 0.18) {
+                spawnPowerUp(dead.x + dead.w / 2, dead.y + dead.h / 2);
+        }
+        break;
+        }
+    }
+}
+// powerups
+for (let i = powerUps.length - 1; i >= 0; i--){
+    powerUps[i].y += powerUps[i].speed;
+
+    if(rectsOverlap(player, powerUps[i])){
+        applyPowerUp(powerUps[i].type);
+        powerUps.splice(i, 1);
+        continue;
+    }
+    if(powerUps[i].y > H + 30){
+        powerUps.splice(i, 1);
+    }
+}
