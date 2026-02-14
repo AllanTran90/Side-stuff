@@ -1,0 +1,27 @@
+body {
+  background: #050510;
+  color: white;
+  font-family: system-ui;
+  text-align: center;
+  margin: 0;
+}
+
+canvas {
+  display: block;
+  margin: 20px auto;
+  border: 2px solid #222;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.hidden {
+  display: none;
+}
