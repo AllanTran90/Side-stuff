@@ -1,18 +1,29 @@
-export const POWER_TYPES = {
-  FIRE_RATE: "fire_rate",
-  BULLET_SPEED: "bullet_speed",
-  MULTI_SHOT: "multi_shot",
-  MOVE_SPEED: "move_speed"
-};
+export function spawnPowerUp(x, y) {
+  return {
+    x,
+    y,
+    w: 20,
+    h: 20,
+    speed: 2,
+    type: "rapid"
+  };
+}
 
-export const POWER_ICONS = {
-  fire_rate: "⚡",
-  bullet_speed: "➚",
-  multi_shot: "✶",
-  move_speed: "»"
-};
+export function updatePowerUps(powerUps, player, stats, overlapFn) {
 
-export function randomPowerType() {
-  const arr = Object.values(POWER_TYPES);
-  return arr[Math.floor(Math.random() * arr.length)];
+  for (let i = powerUps.length - 1; i >= 0; i--) {
+
+    powerUps[i].y += powerUps[i].speed;
+
+    if (overlapFn(powerUps[i], player)) {
+
+      stats.fireRate = 50;
+
+      setTimeout(() => {
+        stats.fireRate = 100;
+      }, 5000);
+
+      powerUps.splice(i, 1);
+    }
+  }
 }

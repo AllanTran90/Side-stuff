@@ -1,5 +1,3 @@
-import { clamp } from "../core/utils.js";
-
 export const DEFAULT_PLAYER_STATS = {
   fireRate: 100,
   bulletSpeed: 7,
@@ -23,5 +21,5 @@ export function movePlayer(player, keys, stats, W) {
   if (keys.has("arrowright") || keys.has("d"))
     player.x += stats.moveSpeed;
 
-  player.x = clamp(player.x, 10, W - player.w - 10);
+ player.x = Math.max(0, Math.min(W - player.w, player.x));
 }
