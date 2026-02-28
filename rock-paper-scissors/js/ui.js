@@ -20,5 +20,5 @@ export function showFinalWinner(winner){
     resultText.textContent =
     winner === 'player'
     ? '🏆 You won the game!'
-    : '💻 Datorn vann spelet!';
+    : '💻 Computer won the game!';
 }

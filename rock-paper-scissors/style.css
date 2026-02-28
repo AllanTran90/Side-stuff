@@ -15,3 +15,23 @@ button {
   font-size: 20px;
   margin-top: 30px;
 }
+
+button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background-color: #222;
+  color: white;
+  transform: scale(1.05);
+}
+
+button.active {
+  background-color: #4CAF50;
+  color: white;
+  transform: scale(1.1);
+}

@@ -12,5 +12,5 @@ export function getRandomChoice(){
 
 export function determineWinner(player,computer) {
   if (player === computer) return 'draw';
-  return winMap[pålayer] === computer ? 'player' : 'computer';
+  return winMap[player] === computer ? 'player' : 'computer';
 }
