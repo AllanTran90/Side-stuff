@@ -4,7 +4,7 @@ body {
   margin-top: 50px;
 }
 
-.buttons button {
+button {
   font-size: 18px;
   padding: 10px 20px;
   margin: 10px;
