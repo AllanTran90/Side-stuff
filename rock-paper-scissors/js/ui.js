@@ -15,3 +15,10 @@ export function render(player, computer, winner){
     scoreText.textContent =
         `You: ${score.player} | Computer: ${score.computer}`;
 }
+
+export function showFinalWinner(winner){
+    resultText.textContent =
+    winner === 'player'
+    ? '🏆 You won the game!'
+    : '💻 Datorn vann spelet!';
+}
