@@ -17,10 +17,12 @@ export function updatePowerUps(powerUps, player, stats, overlapFn) {
 
     if (overlapFn(powerUps[i], player)) {
 
+      const originalFireRate = stats.fireRate;
+
       stats.fireRate = 50;
 
       setTimeout(() => {
-        stats.fireRate = 100;
+        stats.fireRate = originalFireRate;
       }, 5000);
 
       powerUps.splice(i, 1);
