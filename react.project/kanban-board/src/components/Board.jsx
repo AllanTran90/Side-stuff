@@ -1,3 +1,4 @@
+import Col from "./Column";
 import { useState } from "react";
 
 export default function Board(){
@@ -11,38 +12,26 @@ export default function Board(){
 
     return(
     <div style={{ display: "flex", gap: "20px" }}>
-      
-      <div style={{ background: "#eee", padding: "20px", width: "200px" }}>
-        <h3>Todo</h3>
-            {tasks
-                .filter(task => task.status === "todo")
-                .map(task => (
-                <p key={task.id}>{task.title}</p>
-            ))}
-      </div>
 
-      <div style={{ background: "#eee", padding: "20px", width: "200px" }}>
-        <h3>In Progress</h3>
+  <Column
+    title="Todo"
+    status="todo"
+    tasks={tasks}
+  />
 
-        {tasks
-            .filter(task => task.status === "progress")
-            .map(task => (
-            <p key={task.id}>{task.title}</p>
-          ))}
+  <Column
+    title="In Progress"
+    status="progress"
+    tasks={tasks}
+  />
 
-      </div>
-
-      <div style={{ background: "#eee", padding: "20px", width: "200px" }}>
-        <h3>Done</h3>
-
-        {tasks
-            .filter(task => task.status === "done")
-            .map(task => (
-            <p key={task.id}>{task.title}</p>
-        ))}
-
-      </div>
+  <Column
+    title="Done"
+    status="done"
+    tasks={tasks}
+  />
 
     </div>
   );
-}
+  }
+  
