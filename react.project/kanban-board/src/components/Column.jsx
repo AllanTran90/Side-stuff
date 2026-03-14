@@ -1,3 +1,5 @@
+import { TaskCard } from "./TaskCard";
+
 export default function Column({ title, status, tasks }) {
 
   const filteredTasks = tasks.filter(task => task.status === status);
@@ -7,7 +9,7 @@ export default function Column({ title, status, tasks }) {
       <h3>{title}</h3>
 
       {filteredTasks.map(task => (
-        <p key={task.id}>{task.title}</p>
+       <TaskCard key={task.id} task={task} />
       ))}
 
     </div>
