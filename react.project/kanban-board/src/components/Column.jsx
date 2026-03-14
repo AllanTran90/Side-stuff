@@ -1,6 +1,6 @@
 import  TaskCard  from "./TaskCard";
 
-export default function Column({ title, status, tasks }) {
+export default function Column({ title, status, tasks, moveTask }) {
 
   const filteredTasks = tasks.filter(task => task.status === status);
 
@@ -9,9 +9,12 @@ export default function Column({ title, status, tasks }) {
       <h3>{title}</h3>
 
       {filteredTasks.map(task => (
-       <TaskCard key={task.id} task={task} />
-      ))}
-
+        <TaskCard
+          key={task.id}
+          task={task}
+          moveTask={moveTask}
+        />
+        ))}
     </div>
   );
 }

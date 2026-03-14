@@ -1,13 +1,23 @@
-export default function TaskCard({ task }) {
-    return(
-        <div style={{
-            background: "white",
-            padding: "10px",
-            marginBottom: "10px",
-            borderRadius: "6px"
-        }}>
-        {task.title}
+export default function TaskCard({ task, moveTask }) {
+
+  return(
+    <div style={{
+      background: "white",
+      padding: "10px",
+      marginBottom: "10px",
+      borderRadius: "6px"
+    }}>
+
+      <p>{task.title}</p>
+
+      <button onClick={() => moveTask(task.id, "back")}>
+        ◀
+      </button>
+
+      <button onClick={() => moveTask(task.id, "forward")}>
+        ▶
+      </button>
+
     </div>
-    )
-    
+  )
 }
