@@ -1,5 +1,6 @@
 import Column from "./Column";
 import { useState } from "react";
+import AddTask from "./AddTask";
 
 export default function Board(){
 
@@ -9,7 +10,21 @@ export default function Board(){
     { id: 3, title: "Deploy project", status: "done" }
   ]);
 
+    function addTask(title) {
+        const newTask = {
+            id: Date.now(),
+            title: title,
+            status: "todo"
+    };
+
+    setTasks([...tasks, newTask]);
+  }
+
   return (
+    <div>
+
+    <AddTask addTask={addTask} />
+
     <div style={{ display: "flex", gap: "20px" }}>
       
       <Column
@@ -30,6 +45,7 @@ export default function Board(){
         tasks={tasks}
       />
 
+    </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { TaskCard } from "./TaskCard";
+import  TaskCard  from "./TaskCard";
 
 export default function Column({ title, status, tasks }) {
 
