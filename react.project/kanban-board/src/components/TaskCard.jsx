@@ -1,4 +1,4 @@
-export default function TaskCard({ task, moveTask }) {
+export default function TaskCard({ task, moveTask, deleteTask }) {
 
   return(
     <div style={{

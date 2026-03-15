@@ -40,6 +40,10 @@ function moveTask(id, direction) {
 
   }));
 
+  function deleteTask(id) {
+    setTasks(tasks.filter(task => task.id !== id));
+  }
+
 }
 
   return (
