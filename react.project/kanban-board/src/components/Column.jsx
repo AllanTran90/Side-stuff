@@ -1,6 +1,6 @@
 import  TaskCard  from "./TaskCard";
 
-export default function Column({ title, status, tasks, moveTask, deleteTask }) {
+export default function Column({ title, status, tasks, moveTask, deleteTask, openEditModal }) {
 
   const filteredTasks = tasks.filter(task => task.status === status);
 
@@ -14,6 +14,7 @@ export default function Column({ title, status, tasks, moveTask, deleteTask }) {
           task={task}
           moveTask={moveTask}
           deleteTask={deleteTask}
+          openEditModal={openEditModal}
         />
         ))}
     </div>

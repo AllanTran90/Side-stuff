@@ -1,14 +1,18 @@
-export default function TaskCard({ task, moveTask, deleteTask }) {
+export default function TaskCard({ task, moveTask, deleteTask, openEditModal }) {
 
   return(
     <div style={{
       background: "white",
       padding: "10px",
       marginBottom: "10px",
-      borderRadius: "6px"
+      borderRadius: "6px",
     }}>
 
-    <p>{task.title}</p>
+    <p onClick={() => openEditModal(task)}
+        style={{ cursor: "pointer" }}
+        >
+        {task.title}
+    </p>    
 
     <button onClick={() => moveTask(task.id, "back")}>◀
     </button>
