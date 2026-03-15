@@ -1,16 +1,57 @@
-# React + Vite
+# React Kanban Board
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple Kanban board built with React.  
+Users can create tasks, move them between columns, edit them, and delete them.  
+Tasks are saved in the browser using localStorage.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Create new tasks
+- Edit tasks using a modal
+- Move tasks between columns
+- Delete tasks
+- Tasks persist using localStorage
+- Simple and clean Kanban layout
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- JavaScript
+- CSS
+- Vite
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+src/
+components/
+AddTask.jsx
+Board.jsx
+Column.jsx
+TaskCard.jsx
+EditTaskModal.jsx
+
+## Installation
+
+- Clone the repository:
+
+```bash
+git clone https://github.com/AllanTran90/Side-stuff.git
+
+- Go to the project folder:
+
+ cd Side-stuff/react.project/kanban-board
+
+ - Install dependencies
+ npm install
+
+ - Start the development server
+ npm run dev
+
+ ## Author
+
+Allan Tran  
+Web Development Student (WU25)
+
+## License
+
+This project is licensed under the MIT License.
