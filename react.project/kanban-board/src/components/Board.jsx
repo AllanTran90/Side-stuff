@@ -82,7 +82,11 @@ useEffect(() => {
 
       <AddTask addTask={addTask} />
 
-      <div style={{ display: "flex", gap: "20px" }}>
+      <div style={{ display: "flex", 
+                    gap: "20px",
+                    justifyContent: "center" 
+                    }}>
+                        
         {/* todo- column */}
         <Column
           title="Todo"
