@@ -1,15 +1,23 @@
 import Column from "./Column";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddTask from "./AddTask";
+
 
 export default function Board() {
 
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Build React app", status: "todo" },
-    { id: 2, title: "Create components", status: "progress" },
-    { id: 3, title: "Deploy project", status: "done" }
-  ]);
+const [tasks, setTasks] = useState(() => {
+  const saved = localStorage.getItem("tasks");
 
+  if (!saved || saved === "undefined") {
+    return [
+      { id: 1, title: "Build React app", status: "todo" },
+      { id: 2, title: "Create components", status: "progress" },
+      { id: 3, title: "Deploy project", status: "done" }
+    ];
+  }
+
+  return JSON.parse(saved);
+});
   function addTask(title) {
     const newTask = {
       id: Date.now(),
@@ -40,12 +48,15 @@ function moveTask(id, direction) {
 
   }));
 
-  function deleteTask(id) {
-    setTasks(tasks.filter(task => task.id !== id));
-  }
-
+  
+}
+function deleteTask(id) {
+  setTasks(tasks.filter(task => task.id !== id));
 }
 
+useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    }, [tasks]);
   return (
     <div>
 
@@ -58,6 +69,7 @@ function moveTask(id, direction) {
           status="todo"
           tasks={tasks}
           moveTask={moveTask}
+          deleteTask={deleteTask}
         />
 
         <Column
@@ -65,6 +77,7 @@ function moveTask(id, direction) {
           status="progress"
           tasks={tasks}
           moveTask={moveTask}
+          deleteTask={deleteTask}
         />
 
         <Column
@@ -72,6 +85,7 @@ function moveTask(id, direction) {
           status="done"
           tasks={tasks}
           moveTask={moveTask}
+          deleteTask={deleteTask}
         />
 
       </div>
