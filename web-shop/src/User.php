@@ -1,19 +1,18 @@
 <?php
 
-require_once 'Database.php';
-
-class User
+/**
+ * There is no login yet, so the shop always acts as the first user.
+ */
+final class User
 {
     public static function current(): array
     {
-        $db = Database::connect();
-        return $db->query("SELECT * FROM users LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-    }
+        $user = Database::connect()->query('SELECT * FROM users ORDER BY id LIMIT 1')->fetch();
 
-    public static function updateCredits(int $userId, int $newCredits): void
-    {
-        $db = Database::connect();
-        $stmt = $db->prepare("UPDATE users SET credits = ? WHERE id = ?");
-        $stmt->execute([$newCredits, $userId]);
+        if (!$user) {
+            throw new RuntimeException('No user found. Delete webshop.sqlite to rebuild the database.');
+        }
+
+        return $user;
     }
 }

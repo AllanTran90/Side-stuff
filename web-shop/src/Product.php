@@ -1,22 +1,39 @@
 <?php
 
-require_once 'Database.php';
-
-class Product
+final class Product
 {
     public static function all(): array
     {
-        $db = Database::connect();
-        return $db->query("SELECT * FROM products")->fetchAll(PDO::FETCH_ASSOC);
+        return Database::connect()->query('SELECT * FROM products ORDER BY id')->fetchAll();
     }
 
     public static function find(int $id): ?array
     {
-        $db = Database::connect();
-        $stmt = $db->prepare("SELECT * FROM products WHERE id = ?");
+        $stmt = Database::connect()->prepare('SELECT * FROM products WHERE id = ?');
         $stmt->execute([$id]);
-        $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $product ?: null;
+        return $stmt->fetch() ?: null;
+    }
+
+    /** @return array<int, array> products keyed by id */
+    public static function findMany(array $ids): array
+    {
+        if (!$ids) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = Database::connect()->prepare("SELECT * FROM products WHERE id IN ($placeholders)");
+        $stmt->execute(array_values($ids));
+
+        return array_column($stmt->fetchAll(), null, 'id');
+    }
+
+    public static function others(int $exceptId): array
+    {
+        $stmt = Database::connect()->prepare('SELECT * FROM products WHERE id != ? ORDER BY id');
+        $stmt->execute([$exceptId]);
+
+        return $stmt->fetchAll();
     }
 }

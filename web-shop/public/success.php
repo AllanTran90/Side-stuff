@@ -1,2 +1,3 @@
-<h1>✅ Order successful!</h1>
-<a href="index.php">Back to shop</a>
+<?php
+// Old confirmation page. Receipts now live at order.php.
+header('Location: /orders.php', true, 301);

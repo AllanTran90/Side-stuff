@@ -1,79 +1,46 @@
 <?php
-session_start();
-require_once '../src/Product.php';
-require_once '../src/User.php';
+require __DIR__ . '/../src/bootstrap.php';
 
 $products = Product::all();
-$user = User::current();
 
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
-}
+partial('header');
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<section class="container hero">
+    <p class="eyebrow">Potatischips · kryddade för hand</p>
+    <h1 class="hero__title">Krispigt.<br>Enkelt. Gott.</h1>
+    <p class="hero__lead">Tre smaker, gjorda i små satser av riktig potatis. Välj din favorit, eller ta alla tre.</p>
+    <a class="btn btn--primary" href="#sortiment">Se sortimentet</a>
+</section>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Allan's Chip Shop</title>
-    <link rel="stylesheet" href="assets/style.css">
-</head>
-
-<body>
-
-    <div class="topbar">
-        <div class="logo">
-            <h1>🛍 Allan's Chip Shop</h1>
-        </div>
-
-        <nav class="nav">
-            <a href="index.php">Shop</a>
-            <a href="about.php">About</a>
-            <a href="contact.php">Contact</a>
-        </nav>
-
-        <div class="topbar-right">
-            <span class="credits">
-                💳 <?= $user['credits'] ?> credits
-            </span>
-            <a class="cart-link" href="cart.php">
-                🛒 Cart (<?= array_sum($_SESSION['cart']) ?>)
-            </a>
-        </div>
+<section id="sortiment" class="container section">
+    <div class="section__head">
+        <h2 class="section__title">Sortiment</h2>
+        <span class="muted"><?= count($products) ?> smaker</span>
     </div>
 
-    <div class="grid">
+    <div class="product-grid">
         <?php foreach ($products as $product): ?>
-            <div class="card">
-                <img src="assets/images/<?= $product['image'] ?>">
-                <h2>
-                    <a href="product.php?id=<?= $product['id'] ?>">
-                        <?= $product['name'] ?>
-                    </a>
-                </h2>
-                <p><?= $product['description'] ?></p>
-                <p class="price"><?= $product['price'] ?> credits</p>
-
-<form method="post" action="cart.php">
-    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-
-    <input 
-        type="number" 
-        name="quantity" 
-        value="1" 
-        min="1" 
-        max="10"
-        class="quantity-input"
-    >
-
-    <button>Add to cart</button>
-</form>
-            </div>
+            <?php partial('product-card', ['product' => $product]); ?>
         <?php endforeach; ?>
     </div>
+</section>
 
-</body>
+<section class="container section">
+    <ul class="features">
+        <li>
+            <strong>Små satser</strong>
+            <span class="muted">Friterade några kilo i taget för jämn krispighet.</span>
+        </li>
+        <li>
+            <strong>Riktiga råvaror</strong>
+            <span class="muted">Svensk potatis, solrosolja och äkta kryddor.</span>
+        </li>
+        <li>
+            <strong>Betala med saldo</strong>
+            <span class="muted">Handla direkt med ditt saldo och få ett kvitto på köpet.</span>
+        </li>
+    </ul>
+</section>
 
-</html>
+<?php partial('footer'); ?>

@@ -1,57 +1,100 @@
 <?php
-session_start();
-require_once '../src/Product.php';
+require __DIR__ . '/../src/bootstrap.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-$id = (int)$_POST['product_id'];
-$quantity = (int)($_POST['quantity'] ?? 1);
+/* ---------- actions: add / update / remove ---------- */
+if (is_post()) {
+    verify_csrf();
 
-if ($quantity < 1) {
-    $quantity = 1;
-}
+    $productId = post_int('product_id');
+    $product = Product::find($productId);
 
-if (!isset($_SESSION['cart'][$id])) {
-    $_SESSION['cart'][$id] = $quantity;
-} else {
-    $_SESSION['cart'][$id] += $quantity;
-}
+    if (!$product) {
+        flash('Produkten finns inte längre.', 'error');
+        redirect('/cart.php');
     }
 
-    header("Location: cart.php");
-    exit;
+    switch ($_POST['action'] ?? '') {
+        case 'add':
+            $before = Cart::quantityOf($productId);
+            Cart::add($productId, max(1, post_int('quantity', 1)));
+            $added = Cart::quantityOf($productId) - $before;
+
+            flash($added > 0
+                ? "{$product['name']} lades i varukorgen."
+                : 'Max ' . Cart::MAX_QUANTITY . ' st per smak.', $added > 0 ? 'success' : 'error');
+            redirect(safe_path($_POST['return'] ?? null));
+
+        case 'update':
+            Cart::set($productId, post_int('quantity'));
+            break;
+
+        case 'remove':
+            Cart::remove($productId);
+            flash("{$product['name']} togs bort.");
+            break;
+    }
+
+    redirect('/cart.php');
 }
 
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
+/* ---------- view ---------- */
+$lines = Cart::lines();
+$total = Cart::total($lines);
+
+if (!$lines) {
+    message_page('Varukorgen är tom', 'Inget här än. Hitta en smak du gillar i sortimentet.');
 }
 
-$total = 0;
+partial('header', ['pageTitle' => 'Varukorg']);
 ?>
 
-<link rel="stylesheet" href="style.css">
+<section class="container">
+    <h1 class="page-title">Varukorg</h1>
 
-<h1>🛒 Your Cart</h1>
+    <div class="checkout-layout">
+        <ul class="line-items">
+            <?php foreach ($lines as ['product' => $product, 'quantity' => $quantity, 'subtotal' => $subtotal]): ?>
+                <li class="line-item">
+                    <a href="/product.php?id=<?= $product['id'] ?>">
+                        <img class="line-item__image" src="<?= image_url($product['image']) ?>" alt="" width="80" height="100">
+                    </a>
 
-<?php if (empty($_SESSION['cart'])): ?>
-    <p>Your cart is empty.</p>
-<?php else: ?>
+                    <div class="line-item__info">
+                        <a class="line-item__name" href="/product.php?id=<?= $product['id'] ?>"><?= e($product['name']) ?></a>
+                        <span class="muted small"><?= kr($product['price']) ?> / st</span>
 
-<?php foreach ($_SESSION['cart'] as $id => $quantity):
-    $product = Product::find((int)$id);
-    if (!$product) continue;
+                        <div class="line-item__controls">
+                            <form method="post" class="qty-control" aria-label="Antal <?= e($product['name']) ?>">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="action" value="update">
+                                <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                <button class="qty-control__btn" name="quantity" value="<?= $quantity - 1 ?>" aria-label="Minska">−</button>
+                                <span class="qty-control__value"><?= $quantity ?></span>
+                                <button class="qty-control__btn" name="quantity" value="<?= $quantity + 1 ?>" aria-label="Öka"
+                                    <?= $quantity >= Cart::MAX_QUANTITY ? 'disabled' : '' ?>>+</button>
+                            </form>
 
-    $subtotal = $product['price'] * $quantity;
-    $total += $subtotal;
-?>
-    <div class="card">
-        <h2><?= htmlspecialchars($product['name']) ?></h2>
-        <p><?= $quantity ?> × <?= $product['price'] ?> = <?= $subtotal ?></p>
+                            <form method="post">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                <button class="link-button">Ta bort</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <span class="line-item__total"><?= kr($subtotal) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <aside class="summary">
+            <h2 class="summary__title">Sammanfattning</h2>
+            <?php partial('totals', ['total' => $total]); ?>
+            <a class="btn btn--primary btn--block" href="/checkout.php">Till kassan</a>
+            <a class="btn btn--ghost btn--block" href="/">Fortsätt handla</a>
+        </aside>
     </div>
-<?php endforeach; ?>
+</section>
 
-<h2>Total: <?= $total ?> credits</h2>
-
-<a class="cart-link" href="checkout.php">Checkout</a>
-<?php endif; ?>
-
-<a class="cart-link" href="index.php">Back</a>
+<?php partial('footer'); ?>
